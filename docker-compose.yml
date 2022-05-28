@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  postgres:
+    container_name: postgres_service
+    image: postgres:12-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - ./_docker_volumes/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=my_db
+      - POSTGRES_PASSWORD=strapi
+
+  strapi:
+    container_name: strapi_service
+    depends_on:
+      - postgres
+    build:
+      context: .
+      args:
+        - SOURCE_CODE=strapi_backend
+    ports:
+      - 1337:1337
+    volumes:
+      - ./strapi_backend:/opt/app
+    command: yarn develop
+
+  react:
+    container_name: react_service
+    build:
+      context: .
+      args:
+        - SOURCE_CODE=react_frontend
+    ports:
+      - 3000:3000
+    volumes:
+      - ./react_frontend:/opt/app
+    command: yarn start
